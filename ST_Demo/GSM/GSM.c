@@ -4,18 +4,12 @@ This library handles all interaction with the GSM Module.
 Version 0.1 / March 2017
 
 *** How to Use ****
---- Required External Declarations ---
-extern sfr sbit GSM_Pwr_Key;
-#ifdef gsm_reset_en
-extern sfr sbit GSM_Reset;
-#endif
-extern sfr sbit GSM_Stat; // Indicates if the module is powered on
+
 --- Functions ---
 - Required Function Calls -
 gsmInit() - call at startup.
 gsm_MS_Init() - call at startup (required for some functionality / modules).
-gsm_Msg_Init() - call at startup (optional, requires GSM_Msg module).
-gsm_GPRS_Init() - call at startup (optional, requires GSM_GPRS module).
+gsm_GPRS_Init() - call at startup (TBD, requires GSM_GPRS module - not done yet).
 gsm1msPing() - call at 1ms intervals (from an interrupt). This is used to
   update the timers used in this module.
 gsmPoll() - call as often as possible.
@@ -30,16 +24,7 @@ void gsmDateTimeWrite() - instructs the library to write to the GSM
   just before the write occurs)
 - Network Registration -
 char gsmReady() - indicates if the module is registered on the network
-- Text Messages (Requires GSM_Msg Module) -
-void gsmMsgSend(char *Message, char *DestinationID) -
-  drafts a message to be sent 
-char gsmMsgSendPending() - indicates if a draft is waiting to be written
-gsmMsgSendCancel() - cancels drafting of a message
-char gsmMsgJustArrived() - indicates if the message output by gsmMsgRcvd
-  was just received (note that this "fact" is currently roughly estimated and
-  could be wrong) - it can be used as an indication that the date/time extracted
-  from the message header are probably quite accurate
-- GPRS (Requires GSM_GPRS Module) -
+- GPRS (Requires GSM_GPRS Module) - Once done, the functions will be
 void gsmGprsHttpGet(char* url) - initiate a HTTP GET operation
 void gsmGprsHttpPost(char* url, char* postdata) - initiate a HTTP POST operation
 char gsmGprsPending() - indicates if a GPRS operation is pending
@@ -70,32 +55,14 @@ extern void gsmEvent(char GsmEventType)
       Provided PIN code was incorrect
     gsmevntMissedCall
       A missed call has been received
-      pstrGsmEventOriginatorID points to the caller ID
-    gsmevntMsgRcvd (requires GSM_Msg module)
-      Message Received
-      pstrGsmEventOriginatorID points to the sender ID
-      pstrGsmEventData points to the message content
-      dtmGsmEvent contains the date/time at which the message was received
-        (gsmMsgJustArrived() can be used to check if the date/time are current)
-    gsmevntMsgDrafted (requires GSM_Msg module)
-      Messages are first drafted to the SIM memory, then sent from there
-      pstrGsmEventData points to the message ID
-    gsmevntMsgDiscarded (requires GSM_Msg module)
-      Failed whilst trying to draft message to SIM card
-        (can occur if the SIM memory is full)
-    gsmevntMsgSent (requires GSM_Msg module)
-      Message sent
-      pstrGsmEventData points to the message ID
-    gsmevntMsgSendFailed (requires GSM_Msg module)
-      Failed to send message
-        (can occur if no airtime/credit is available)
+      pstrGsmEventOriginatorID points to the caller ID   
     gsmevntGprsFailed (requires GSM_GPRS module)
       Failed to complete GPRS operation
     gsmevntGprsHttpResultErr (requires GSM_GPRS module)
       HTTP operation returned a result code other than 200
         (e.g. 404 - page not found)
       pstrGsmEventData points to the result code
-    gsmevntGprsHttpResponseLine (requires GSM_GPRS module)
+    gsmevntGprsHttpResponseLine (requires GSM_GPRS module to be completed)
       HTTP operation result (fired for each line received)
       pstrGsmEventData points to the result data
 *** Debugging Features ***
@@ -972,6 +939,12 @@ void gsmInit() {
   #ifdef gsm_reset_en
   GSM_Reset->BRR = GSM_Reset_Pin;
   #endif
+//  HAL_Delay(100);
+//  GSM_Pwr_Key->BSRR = GSM_Pwr_Key_Pin;
+//  HAL_Delay(100);
+//  GSM_Pwr_Key->BRR = GSM_Pwr_Key_Pin;
+  while(GSM_Stat->IDR & GSM_Stat_Pin != GPIO_PIN_SET);
+  
   bitGsmDateTimeReadPending = 0;
   bitGsmDateTimeWritePending = 0;
   bitExpectGSM_On = 0;

@@ -13,38 +13,38 @@
 #include "stm32l4xx_hal.h"
 #include "string.h"
 
-//extern sfr sbit GSM_Pwr_Key;
-#define GSM_Pwr_Key_Port GPIOB
-#define GSM_Pwr_Key_Pin  GPIO_PIN_8 //this will use GPIOB Pin8 as the handler
+#define GPIO_GSM_Pwr_Key_CLK_ENABLE()   __HAL_RCC_GPIOE_CLK_ENABLE()
+#define GSM_Pwr_Key_Port GPIOE
+#define GSM_Pwr_Key_Pin  GPIO_PIN_10 //this will use GPIOB Pin8 as the handler
 extern volatile GPIO_TypeDef *GSM_Pwr_Key;// = (GPIO_TypeDef *)(GSM_Pwr_Key_Port);
 
 #ifdef gsm_reset_en
-//extern sfr sbit GSM_Reset;
-#define GSM_Reset_Port GPIOB
-#define GSM_Reset_Pin  GPIO_PIN_9 //this will use GPIOB Pin9 as the handler
+#define GPIO_GSM_Reset_CLK_ENABLE() __HAL_RCC_GPIOE_CLK_ENABLE()
+#define GSM_Reset_Port GPIOE
+#define GSM_Reset_Pin  GPIO_PIN_11 //this will use GPIOB Pin9 as the handler
 extern volatile GPIO_TypeDef *GSM_Reset;// = (GPIO_TypeDef *)(GSM_Reset_Port);
 #endif
-//extern sfr sbit GSM_Stat; // Indicates if the module is powered on
-#define GSM_Stat_Port GPIOB
-#define GSM_Stat_Pin  GPIO_PIN_7 //this will use GPIOB Pin7 as the handler
+#define GPIO_GSM_Stat_CLK_ENABLE()   __HAL_RCC_GPIOE_CLK_ENABLE() // Indicates if the module is powered on
+#define GSM_Stat_Port GPIOE
+#define GSM_Stat_Pin  GPIO_PIN_12 //this will use GPIOB Pin7 as the handler
 extern volatile GPIO_TypeDef *GSM_Stat;// = (GPIO_TypeDef *)(GSM_Stat_Port);
 
-#define USART_GSM          USART3     
-#define USART_GSM_BAUDRATE 115200
+#define USART_GSM          UART4     
+#define USART_GSM_BAUDRATE 9600
 #define TimeOut_TX 1000
 #define TimeOut_RX 1000
 
 extern UART_HandleTypeDef UartGSMHandle;
 
-#define USART_GSM_CLK_ENABLE()              __HAL_RCC_USART3_CLK_ENABLE()
-#define USART_GSM_RX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOC_CLK_ENABLE()
-#define USART_GSM_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOC_CLK_ENABLE()
-#define USART_GSM_TX_PIN                    GPIO_PIN_4
-#define USART_GSM_TX_GPIO_PORT              GPIOC
-#define USART_GSM_RX_PIN                    GPIO_PIN_5
-#define USART_GSM_RX_GPIO_PORT              GPIOC
-#define USART_GSM_TX_AF                     GPIO_AF7_USART3
-#define USART_GSM_RX_AF                     GPIO_AF7_USART3
+#define USART_GSM_CLK_ENABLE()              __HAL_RCC_UART4_CLK_ENABLE()
+#define USART_GSM_RX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
+#define USART_GSM_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
+#define USART_GSM_TX_PIN                    GPIO_PIN_0
+#define USART_GSM_TX_GPIO_PORT              GPIOA
+#define USART_GSM_RX_PIN                    GPIO_PIN_1
+#define USART_GSM_RX_GPIO_PORT              GPIOA
+#define USART_GSM_TX_AF                     GPIO_AF8_UART4
+#define USART_GSM_RX_AF                     GPIO_AF8_UART4
 
 #ifdef __GNUC__
 extern const char gsmevntDateTimeRead;
@@ -221,6 +221,7 @@ char UART_Tx_Idle(void);
 void UART_Write(char *pData);
 char UART_Read(void);
 bit UART_Data_Ready(void);
+void UART_GSM_Init(void);
 
 extern unsigned int wrdGsmGPTmr;
 extern unsigned long dwdGsmGPTmr;
